@@ -1,6 +1,6 @@
 import { jwtVerify, SignJWT } from 'jose'
 
-const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback_secret')
+const SECRET = new TextEncoder().encode(process.env.JWT_SECRET)
 
 export async function signToken(payload: any): Promise<string> {
   return new SignJWT(payload)
