@@ -77,21 +77,31 @@ function Dashboard() {
         e.preventDefault()
         setLoading(true)
         setProgress(0)
-
+    
         try {
             const response = await fetch('/api/generate-image', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ prompt, model: selectedModel }),
             })
-
+    
             const interval = setInterval(() => {
                 setProgress((prev) => (prev >= 100 ? 100 : prev + 10))
             }, 100)
-
-            const data = await response.json()
+    
+            const text = await response.text() // First, get the raw text response
+            console.log('Raw response:', text) // Log the raw response for debugging
+    
+            let data
+            try {
+                data = JSON.parse(text) // Then try to parse it as JSON
+            } catch (parseError) {
+                console.error('Error parsing JSON:', parseError)
+                throw new Error('Invalid response from server')
+            }
+    
             clearInterval(interval)
-
+    
             if (response.ok) {
                 setGeneratedImage(data.imageUrl)
                 toast({

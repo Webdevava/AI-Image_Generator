@@ -1,10 +1,8 @@
 import { NextResponse } from 'next/server'
 import { HfInference } from '@huggingface/inference'
 
-// Create the HfInference instance outside the handler function
 const hf = new HfInference(process.env.HUGGINGFACE_API_KEY)
 
-// List of fallback models to try if the primary model fails
 const fallbackModels = [
   "stabilityai/stable-diffusion-2-1",
   "runwayml/stable-diffusion-v1-5",
@@ -21,7 +19,6 @@ export async function POST(req: Request) {
 
     console.log(`Attempting to generate image with prompt: "${prompt}" using model: ${model}`)
 
-    // Try the requested model first, then fall back to others if it fails
     const modelsToTry = [model, ...fallbackModels]
 
     for (const currentModel of modelsToTry) {
@@ -49,6 +46,8 @@ export async function POST(req: Request) {
         return NextResponse.json({ imageUrl: dataUrl, usedModel: currentModel })
       } catch (modelError) {
         console.error(`Error with model ${currentModel}:`, modelError)
+        // Log the full error object for debugging
+        console.error('Full error object:', JSON.stringify(modelError, null, 2))
       }
     }
 
@@ -57,6 +56,8 @@ export async function POST(req: Request) {
 
   } catch (error) {
     console.error('Error in image generation:', error)
+    // Log the full error object for debugging
+    console.error('Full error object:', JSON.stringify(error, null, 2))
     return NextResponse.json(
       { message: `Image generation failed: ${(error as Error).message}` },
       { status: 500 }
